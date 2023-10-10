@@ -9,6 +9,7 @@ import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
 import org.progLin.interfaces.ConstraintCreator;
+import org.progLin.interfaces.ContraintCreatorImpl;
 
 import java.util.List;
 
@@ -22,12 +23,12 @@ public class TwoPhaseMethodSolver {
         this.numVariables = numVariables;
         this.objectiveCoefficients = objectiveCoefficients;
         this.constraintDataList = constraintDataList;
-        this.constraintCreator = constraintCreator;
+        this.constraintCreator = new ContraintCreatorImpl();
     }
 
     public void solve() throws OptimizationException {
         // Crear una lista para almacenar las restricciones de la Fase 1
-        List<LinearConstraint> phase1Constraints = createPhase1Constraints();
+        List<LinearConstraint> phase1Constraints = constraintCreator.createConstraints(this.constraintDataList);
 
         // Resolver la Fase 1 utilizando el método Simplex
         SimplexSolver phase1Solver = new SimplexSolver();
@@ -45,7 +46,7 @@ public class TwoPhaseMethodSolver {
         }
 
         // Crear una lista para almacenar las restricciones de la Fase 2
-        List<LinearConstraint> phase2Constraints = createPhase2Constraints();
+        List<LinearConstraint> phase2Constraints = constraintCreator.createConstraints(this.constraintDataList);
 
         // Resolver la Fase 2 utilizando el método Simplex
         SimplexSolver phase2Solver = new SimplexSolver();
@@ -65,17 +66,6 @@ public class TwoPhaseMethodSolver {
         System.out.println("Valor óptimo = " + phase2Solution.getValue());
     }
 
-    private List<LinearConstraint> createPhase1Constraints() {
-        // Implementa la creación de restricciones de la Fase 1 aquí
-        // Agrega variables artificiales y configura las restricciones adecuadamente
-        // Devuelve la lista de restricciones de la Fase 1
-        return null; // Implementa esto
-    }
 
-    private List<LinearConstraint> createPhase2Constraints() {
-        // Implementa la creación de restricciones de la Fase 2 aquí
-        // Utiliza el resultado de la Fase 1 para definir las restricciones
-        // Devuelve la lista de restricciones de la Fase 2
-        return null; // Implementa esto
-    }
+
 }

@@ -14,6 +14,7 @@ public class InputReader {
         System.out.println("Seleccione un método de resolución:");
         System.out.println("1. Método Simplex");
         System.out.println("2. Método de M grande (Big M method)");
+        System.out.println("3. Método de dos fases");
         System.out.print("Elija una opción : ");
         int choice = scanner.nextInt();
 
@@ -23,6 +24,9 @@ public class InputReader {
                 break;
             case 2:
                 solveWithBigMMethod();
+                break;
+            case 3:
+                solveWithTwoPhaseMethod();
                 break;
             default:
                 System.out.println("Opción no válida. Saliendo del programa.");
@@ -125,7 +129,7 @@ public class InputReader {
         solver.solve();
     }
 
-   /* private static void solveWithTwoPhaseMethod() throws OptimizationException {
+   private static void solveWithTwoPhaseMethod() throws OptimizationException {
         Scanner scanner = new Scanner(System.in);
 
         // Solicitar al usuario los datos del problema para el método de las dos fases
@@ -170,7 +174,7 @@ public class InputReader {
         // Resolver el problema utilizando el método de las dos fases
         TwoPhaseMethodSolver solver = new TwoPhaseMethodSolver(numVariables, objectiveCoefficients, constraintDataList);
         solver.solve();
-    }*/
+    }
 
 
 
