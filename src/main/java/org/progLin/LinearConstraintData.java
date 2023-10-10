@@ -1,4 +1,4 @@
-package org.example;
+package org.progLin;
 
 public class LinearConstraintData {
 

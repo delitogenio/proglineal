@@ -1,4 +1,4 @@
-package org.example;
+package org.progLin;
 
 import org.apache.commons.math.optimization.GoalType;
 import org.apache.commons.math.optimization.OptimizationException;
@@ -7,20 +7,23 @@ import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
 import org.apache.commons.math.optimization.linear.Relationship;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
+import org.progLin.interfaces.ConstraintCreator;
+import org.progLin.interfaces.ContraintCreatorImpl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class LinearProgrammingSolver {
     private int numVariables;
     private double[] objectiveCoefficients;
     private List<LinearConstraintData> constraintDataList;
+    private ConstraintCreator constraintCreator;
 
     public LinearProgrammingSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList) {
         this.numVariables = numVariables;
         this.objectiveCoefficients = objectiveCoefficients;
         this.constraintDataList = constraintDataList;
+        this.constraintCreator = new ContraintCreatorImpl();
     }
 
     public void solve() throws OptimizationException {
@@ -28,7 +31,7 @@ public class LinearProgrammingSolver {
         LinearObjectiveFunction objectiveFunction = new LinearObjectiveFunction(objectiveCoefficients, 0);
 
         // Crear una lista de restricciones lineales
-        List<LinearConstraint> constraints = createConstraints();
+        List<LinearConstraint> constraints = constraintCreator.createConstraints(this.constraintDataList);
 
         // Crear un objeto SimplexSolver para resolver el problema
         SimplexSolver solver = new SimplexSolver();
