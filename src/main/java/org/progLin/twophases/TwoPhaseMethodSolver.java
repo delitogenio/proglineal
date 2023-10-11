@@ -1,4 +1,4 @@
-package org.progLin;
+package org.progLin.twophases;
 
 
 
@@ -8,6 +8,7 @@ import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
 import org.apache.commons.math.optimization.linear.SimplexSolver;
+import org.progLin.simplex.LinearConstraintData;
 import org.progLin.interfaces.ConstraintCreator;
 import org.progLin.interfaces.ContraintCreatorImpl;
 

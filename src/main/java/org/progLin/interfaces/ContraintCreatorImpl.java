@@ -2,7 +2,7 @@ package org.progLin.interfaces;
 
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.Relationship;
-import org.progLin.LinearConstraintData;
+import org.progLin.simplex.LinearConstraintData;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.progLin;
+package org.progLin.simplex;
 
 import org.apache.commons.math.optimization.GoalType;
 import org.apache.commons.math.optimization.OptimizationException;

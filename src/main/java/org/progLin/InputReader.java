@@ -1,6 +1,10 @@
 package org.progLin;
 
 import org.apache.commons.math.optimization.OptimizationException;
+import org.progLin.bigM.BigMMethodSolver;
+import org.progLin.simplex.LinearConstraintData;
+import org.progLin.simplex.LinearProgrammingSolver;
+import org.progLin.twophases.TwoPhaseMethodSolver;
 
 import java.util.ArrayList;
 import java.util.List;
