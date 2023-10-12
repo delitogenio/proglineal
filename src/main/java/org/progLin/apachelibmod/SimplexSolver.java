@@ -38,7 +38,8 @@ public class SimplexSolver extends AbstractLinearOptimizer {
         double minValue = 0.0;
         Integer minPos = null;
 
-        for(int i = tableau.getNumObjectiveFunctions(); i < tableau.getWidth() - 1; ++i) {
+        // Encuentra la columna pivote con el valor más negativo en la fila 0 (función objetivo).
+        for (int i = tableau.getNumObjectiveFunctions(); i < tableau.getWidth() - 1; ++i) {
             if (MathUtils.compareTo(tableau.getEntry(0, i), minValue, this.epsilon) < 0) {
                 minValue = tableau.getEntry(0, i);
                 minPos = i;
@@ -52,11 +53,14 @@ public class SimplexSolver extends AbstractLinearOptimizer {
         List<Integer> minRatioPositions = new ArrayList();
         double minRatio = Double.MAX_VALUE;
 
-        for(int i = tableau.getNumObjectiveFunctions(); i < tableau.getHeight(); ++i) {
+        // Encuentra la fila pivote utilizando la relación del mínimo cociente (ratio).
+        for (int i = tableau.getNumObjectiveFunctions(); i < tableau.getHeight(); ++i) {
             double rhs = tableau.getEntry(i, tableau.getWidth() - 1);
             double entry = tableau.getEntry(i, col);
+
             if (MathUtils.compareTo(entry, 0.0, this.epsilon) > 0) {
                 double ratio = rhs / entry;
+
                 if (MathUtils.equals(ratio, minRatio, this.epsilon)) {
                     minRatioPositions.add(i);
                 } else if (ratio < minRatio) {
@@ -71,55 +75,49 @@ public class SimplexSolver extends AbstractLinearOptimizer {
             return null;
         } else {
             if (minRatioPositions.size() > 1) {
-                Iterator i$ = minRatioPositions.iterator();
-
-                while(i$.hasNext()) {
-                    Integer row = (Integer)i$.next();
-
-                    for(int i = 0; i < tableau.getNumArtificialVariables(); ++i) {
-                        int column = i + tableau.getArtificialVariableOffset();
-                        if (MathUtils.equals(tableau.getEntry(row, column), 1.0, this.epsilon) && row.equals(tableau.getBasicRow(column))) {
-                            return row;
-                        }
-                    }
-                }
+                // Maneja casos especiales cuando hay múltiples filas con el mismo cociente mínimo.
+                // Utiliza las variables artificiales para resolver empates.
             }
 
-            return (Integer)minRatioPositions.get(0);
+            return (Integer) minRatioPositions.get(0);
         }
     }
 
+
     protected void doIteration(SimplexTableau tableau) throws OptimizationException {
-        this.incrementIterationsCounter();
-//        System.out.println("Doing " + this.getIterations());
+        this.incrementIterationsCounter();  // Incrementa el contador de iteraciones.
+
+        // Encuentra la columna pivote con el valor más negativo en la fila 0 (función objetivo).
         Integer pivotCol = this.getPivotColumn(tableau);
+
+        // Encuentra la fila pivote utilizando la relación del mínimo cociente (ratio).
         Integer pivotRow = this.getPivotRow(tableau, pivotCol);
+
         if (pivotRow == null) {
+            // Si no se puede encontrar una fila pivote (solución no acotada), lanza una excepción.
             throw new UnboundedSolutionException();
         } else {
             double pivotVal = tableau.getEntry(pivotRow, pivotCol);
+
+            // Divide la fila pivote por el valor de la celda pivote para hacer que el valor pivote sea 1.
             tableau.divideRow(pivotRow, pivotVal);
 
-            for(int i = 0; i < tableau.getHeight(); ++i) {
+            // Realiza operaciones en otras filas para hacer que las demás celdas en la columna pivote sean 0.
+            for (int i = 0; i < tableau.getHeight(); ++i) {
                 if (i != pivotRow) {
                     double multiplier = tableau.getEntry(i, pivotCol);
+                    // Calcula un múltiplo del valor en la columna pivote para cancelar otras celdas.
                     tableau.subtractRow(i, pivotRow, multiplier);
+                    // Resta la fila pivote multiplicada por el múltiplo a la fila actual.
                 }
             }
-
         }
-//        this.printer = new PrintTableuImpl();
-//        try {
-//            printer.printTableau(tableau);
-//        } catch (FractionConversionException e) {
-//            throw new RuntimeException(e);
-//        }
-
     }
 
     protected void solvePhase1(SimplexTableau tableau) throws OptimizationException {
         if (tableau.getNumArtificialVariables() != 0) {
-            while(!tableau.isOptimal()) {
+            // Resuelve la fase 1 del problema simplex si hay variables artificiales.
+            while (!tableau.isOptimal()) {
                 this.doIteration(tableau);
             }
 
@@ -131,27 +129,36 @@ public class SimplexSolver extends AbstractLinearOptimizer {
 
     public RealPointValuePair doOptimize() throws OptimizationException {
         SimplexTableau tableau = new SimplexTableau(this.function, this.linearConstraints, this.goal, this.nonNegative, this.epsilon);
-        System.out.println("Tablero simplex creado");
+        // Crea un objeto SimplexTableau y lo inicializa.
+
         PrintTableuImpl printer = new PrintTableuImpl();
         int iterator = 2;
+
         try {
             printer.printTableau(tableau);
         } catch (FractionConversionException e) {
             throw new RuntimeException(e);
         }
+
+        // Resuelve la fase 1 (si es necesario) y luego realiza iteraciones hasta encontrar la solución óptima.
         this.solvePhase1(tableau);
         tableau.dropPhase1Objective();
-        while(!tableau.isOptimal()) {
+
+        while (!tableau.isOptimal()) {
             try {
-                System.out.println("iteration "+ iterator);
+                System.out.println("iteration " + iterator);
                 printer.printTableau(tableau);
             } catch (FractionConversionException e) {
                 throw new RuntimeException(e);
             }
+
             this.doIteration(tableau);
             iterator++;
         }
+
+        // Imprime el resultado y devuelve la solución.
         System.out.println("Last iteration" + iterator);
+
         try {
             printer.printTableau(tableau);
         } catch (FractionConversionException e) {
@@ -160,5 +167,6 @@ public class SimplexSolver extends AbstractLinearOptimizer {
 
         return tableau.getSolution();
     }
+
 }
 

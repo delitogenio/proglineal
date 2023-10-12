@@ -55,30 +55,38 @@ public class SimplexTableau implements Serializable {
     }
 
     protected void initializeColumnLabels() {
+        // Agrega la etiqueta "W" si hay 2 funciones objetivo (fase 1).
         if (this.getNumObjectiveFunctions() == 2) {
             this.columnLabels.add("W");
         }
 
+        // Agrega la etiqueta "Z" para la función objetivo.
         this.columnLabels.add("Z");
 
+        // Agrega etiquetas para las variables de decisión originales (x0, x1, x2, ...).
         for (int i = 0; i < this.getOriginalNumDecisionVariables(); ++i) {
             this.columnLabels.add("x" + i);
         }
 
+        // Agrega la etiqueta "x-" si no se restringe a ser no negativa.
         if (!this.restrictToNonNegative) {
             this.columnLabels.add("x-");
         }
 
+        // Agrega etiquetas para las variables de holgura (s0, s1, s2, ...).
         for (int j = 0; j < this.getNumSlackVariables(); ++j) {
             this.columnLabels.add("s" + j);
         }
 
+        // Agrega etiquetas para las variables artificiales (a0, a1, a2, ...).
         for (int k = 0; k < this.getNumArtificialVariables(); ++k) {
             this.columnLabels.add("a" + k);
         }
 
+        // Agrega la etiqueta "RHS" (lado derecho de las restricciones).
         this.columnLabels.add("RHS");
     }
+
 
     protected RealMatrix createTableau(boolean maximize) {
 
@@ -128,16 +136,24 @@ public class SimplexTableau implements Serializable {
     }
 
     public List<LinearConstraint> normalizeConstraints(Collection<LinearConstraint> originalConstraints) {
+        // Crea una lista para almacenar las restricciones normalizadas.
         List<LinearConstraint> normalized = new ArrayList();
+
+        // Itera a través de las restricciones originales.
         Iterator i$ = originalConstraints.iterator();
 
-        while(i$.hasNext()) {
-            LinearConstraint constraint = (LinearConstraint)i$.next();
+        while (i$.hasNext()) {
+            // Obtiene una restricción original.
+            LinearConstraint constraint = (LinearConstraint) i$.next();
+
+            // Normaliza la restricción y la agrega a la lista de restricciones normalizadas.
             normalized.add(this.normalize(constraint));
         }
 
+        // Devuelve la lista de restricciones normalizadas.
         return normalized;
     }
+
 
     private LinearConstraint normalize(LinearConstraint constraint) {
         return constraint.getValue() < 0.0 ? new LinearConstraint(constraint.getCoefficients().mapMultiply(-1.0), constraint.getRelationship().oppositeRelationship(), -1.0 * constraint.getValue()) : new LinearConstraint(constraint.getCoefficients(), constraint.getRelationship(), constraint.getValue());
@@ -193,26 +209,29 @@ public class SimplexTableau implements Serializable {
             List<Integer> columnsToDrop = new ArrayList();
             columnsToDrop.add(0);
 
-            // Primer bucle
+            // Primer bucle: Identifica las columnas a eliminar relacionadas con variables artificiales.
             int i;
             for (i = this.getNumObjectiveFunctions(); i < this.getArtificialVariableOffset(); ++i) {
+                // Si la entrada en la fila 0 y la columna i es positiva, se agrega la columna a la lista de eliminación.
                 if (MathUtils.compareTo(this.tableau.getEntry(0, i), 0.0, this.epsilon) > 0) {
                     columnsToDrop.add(i);
                 }
             }
 
-            // Segundo bucle
+            // Segundo bucle: Identifica las columnas a eliminar relacionadas con variables artificiales no básicas.
             int j;
             for (j = 0; j < this.getNumArtificialVariables(); ++j) {
                 int k = j + this.getArtificialVariableOffset();
+                // Si la fila básica de la columna k es nula, se agrega la columna a la lista de eliminación.
                 if (this.getBasicRow(k) == null) {
                     columnsToDrop.add(k);
                 }
             }
 
+            // Crea una nueva matriz para el tableau sin las columnas marcadas para eliminación.
             double[][] matrix = new double[this.getHeight() - 1][this.getWidth() - columnsToDrop.size()];
 
-            // Tercer bucle
+            // Tercer bucle: Copia las entradas no eliminadas al nuevo tableau.
             for (int m = 1; m < this.getHeight(); ++m) {
                 int col = 0;
 
@@ -222,21 +241,21 @@ public class SimplexTableau implements Serializable {
                     }
                 }
             }
-            System.out.println("Columnas a elimnar por variables extras innecesarios" + columnsToDrop);
+            System.out.println("Columnas a eliminar por variables extras innecesarias: " + columnsToDrop);
 
-
-            // Cuarto bucle
+            // Cuarto bucle: Elimina las etiquetas de columna correspondientes a las columnas eliminadas.
             for (int l = columnsToDrop.size() - 1; l >= 0; --l) {
                 Integer remove = columnsToDrop.get(l);
                 String toRemove = this.columnLabels.get(remove);
                 this.columnLabels.remove(toRemove);
             }
 
-
+            // Reemplaza el tableau original con el nuevo tableau sin las columnas eliminadas y establece el número de variables artificiales en 0.
             this.tableau = new Array2DRowRealMatrix(matrix);
             this.numArtificialVariables = 0;
         }
     }
+
 
     private void copyArray(double[] src, double[] dest) {
         System.arraycopy(src, 0, dest, this.getNumObjectiveFunctions(), src.length);
@@ -252,28 +271,45 @@ public class SimplexTableau implements Serializable {
     }
 
     protected RealPointValuePair getSolution() {
-        System.out.println("Solución encontrada, obteniendo resultados");
+        System.out.println("Solución encontrada, obteniendo resultados");  // Imprime un mensaje de solución encontrada.
+
+        // Encuentra la columna correspondiente a la variable "x-" (si existe).
         int negativeVarColumn = this.columnLabels.indexOf("x-");
+
+        // Encuentra la fila básica correspondiente a la variable "x-" (si existe).
         Integer negativeVarBasicRow = negativeVarColumn > 0 ? this.getBasicRow(negativeVarColumn) : null;
+
+        // Inicializa el valor más negativo en caso de que no haya una variable "x-".
         double mostNegative = negativeVarBasicRow == null ? 0.0 : this.getEntry(negativeVarBasicRow, this.getRhsOffset());
+
+        // Un conjunto para almacenar las filas básicas para evitar duplicados.
         Set<Integer> basicRows = new HashSet();
+
+        // Inicializa un arreglo para almacenar los coeficientes de las variables originales.
         double[] coefficients = new double[this.getOriginalNumDecisionVariables()];
 
-        for(int i = 0; i < coefficients.length; ++i) {
+        for (int i = 0; i < coefficients.length; ++i) {
+            // Encuentra el índice de la columna correspondiente a la variable "x" (i).
             int colIndex = this.columnLabels.indexOf("x" + i);
+
             if (colIndex < 0) {
+                // Si la variable "x" no se encuentra en el tableau, establece su coeficiente a 0.
                 coefficients[i] = 0.0;
             } else {
+                // Encuentra la fila básica correspondiente a la variable "x" (i).
                 Integer basicRow = this.getBasicRow(colIndex);
+
                 if (basicRows.contains(basicRow)) {
+                    // Si la fila básica ya se ha utilizado, el coeficiente es 0.
                     coefficients[i] = 0.0;
                 } else {
                     basicRows.add(basicRow);
+                    // Calcula el coeficiente de la variable "x" (i) en función de su fila básica y "x-".
                     coefficients[i] = (basicRow == null ? 0.0 : this.getEntry(basicRow, this.getRhsOffset())) - (this.restrictToNonNegative ? 0.0 : mostNegative);
                 }
             }
         }
-
+        // Devuelve un objeto RealPointValuePair con los coeficientes y el valor objetivo.
         return new RealPointValuePair(coefficients, this.f.getValue(coefficients));
     }
 
