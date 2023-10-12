@@ -43,7 +43,6 @@ public class InputReader {
         }
 
     }
-
     private static void solveWithSimplex() throws OptimizationException {
         Scanner scanner = new Scanner(System.in);
 
@@ -154,7 +153,6 @@ public class InputReader {
         BigMMethodSolver solver = new BigMMethodSolver(numVariables, objectiveCoefficients, constraintDataList,goalType);
         solver.solve();
     }
-
    private static void solveWithTwoPhaseMethod() throws OptimizationException {
         Scanner scanner = new Scanner(System.in);
 
@@ -209,7 +207,6 @@ public class InputReader {
         TwoPhaseMethodSolver solver = new TwoPhaseMethodSolver(numVariables, objectiveCoefficients, constraintDataList,goalType);
         solver.solve();
     }
-
    private static void solveWithSimplexMod() throws OptimizationException {
         Scanner scanner = new Scanner(System.in);
         GoalType goalType;

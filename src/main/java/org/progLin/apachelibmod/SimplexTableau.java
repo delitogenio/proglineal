@@ -90,40 +90,61 @@ public class SimplexTableau implements Serializable {
 
     protected RealMatrix createTableau(boolean maximize) {
 
+        // Calcula el ancho y alto de la matriz del tableau.
         int width = this.numDecisionVariables + this.numSlackVariables + this.numArtificialVariables + this.getNumObjectiveFunctions() + 1;
         int height = this.constraints.size() + this.getNumObjectiveFunctions();
+
+        // Crea una matriz para representar el tableau del algoritmo simplex.
         Array2DRowRealMatrix matrix = new Array2DRowRealMatrix(height, width);
+
+        // Configura la primera fila del tableau (fila 0) si hay dos funciones objetivo.
         if (this.getNumObjectiveFunctions() == 2) {
             matrix.setEntry(0, 0, -1.0);
         }
 
+        // Determina la fila objetivo (z) en función de si se está maximizando o minimizando.
         int zIndex = this.getNumObjectiveFunctions() == 1 ? 0 : 1;
         matrix.setEntry(zIndex, zIndex, maximize ? 1.0 : -1.0);
+
+        // Copia los coeficientes de la función objetivo en la fila objetivo (z).
         RealVector objectiveCoefficients = maximize ? this.f.getCoefficients().mapMultiply(-1.0) : this.f.getCoefficients();
         this.copyArray(objectiveCoefficients.getData(), matrix.getDataRef()[zIndex]);
+        // Configura la entrada correspondiente al término constante de la función objetivo.
         matrix.setEntry(zIndex, width - 1, maximize ? this.f.getConstantTerm() : -1.0 * this.f.getConstantTerm());
+
+        // Si no se restringe a las variables no negativas, realiza ajustes en la fila objetivo (z).
         if (!this.restrictToNonNegative) {
             matrix.setEntry(zIndex, this.getSlackVariableOffset() - 1, getInvertedCoeffiecientSum(objectiveCoefficients));
         }
 
+// Inicializa contadores para las variables de holgura y artificiales.
         int slackVar = 0;
         int artificialVar = 0;
 
+        // Itera a través de las restricciones y las agrega al tableau.
         for(int i = 0; i < this.constraints.size(); ++i) {
-            LinearConstraint constraint = (LinearConstraint)this.constraints.get(i);
+            LinearConstraint constraint = (LinearConstraint) this.constraints.get(i);
             int row = this.getNumObjectiveFunctions() + i;
+
+            // Copia los coeficientes de la restricción en la fila correspondiente del tableau.
             this.copyArray(constraint.getCoefficients().getData(), matrix.getDataRef()[row]);
+
+            // Realiza ajustes si no se restringen las variables no negativas.
             if (!this.restrictToNonNegative) {
                 matrix.setEntry(row, this.getSlackVariableOffset() - 1, getInvertedCoeffiecientSum(constraint.getCoefficients()));
             }
 
+            // Configura el valor RHS de la restricción en la fila del tableau.
             matrix.setEntry(row, width - 1, constraint.getValue());
+
+            // Agrega variables de holgura (slack) según la relación de la restricción.
             if (constraint.getRelationship() == Relationship.LEQ) {
                 matrix.setEntry(row, this.getSlackVariableOffset() + slackVar++, 1.0);
             } else if (constraint.getRelationship() == Relationship.GEQ) {
                 matrix.setEntry(row, this.getSlackVariableOffset() + slackVar++, -1.0);
             }
 
+            // Agrega variables artificiales según la relación de la restricción.
             if (constraint.getRelationship() == Relationship.EQ || constraint.getRelationship() == Relationship.GEQ) {
                 matrix.setEntry(0, this.getArtificialVariableOffset() + artificialVar, 1.0);
                 matrix.setEntry(row, this.getArtificialVariableOffset() + artificialVar++, 1.0);
@@ -131,7 +152,7 @@ public class SimplexTableau implements Serializable {
             }
         }
 
-
+        // Devuelve el tableau del algoritmo simplex creado.
         return matrix;
     }
 
