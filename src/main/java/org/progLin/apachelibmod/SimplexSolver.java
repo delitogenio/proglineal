@@ -7,7 +7,6 @@ package org.progLin.apachelibmod;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.math.fraction.FractionConversionException;
@@ -86,12 +85,19 @@ public class SimplexSolver extends AbstractLinearOptimizer {
 
     protected void doIteration(SimplexTableau tableau) throws OptimizationException {
         this.incrementIterationsCounter();  // Incrementa el contador de iteraciones.
+        this.printer = new PrintTableuImpl();
+
+        System.out.println("Iteracion " + this.getIterations());
 
         // Encuentra la columna pivote con el valor más negativo en la fila 0 (función objetivo).
         Integer pivotCol = this.getPivotColumn(tableau);
+        int printCol = pivotCol + 1;
+        System.out.println("La columna que salió es "+ printCol);
 
         // Encuentra la fila pivote utilizando la relación del mínimo cociente (ratio).
         Integer pivotRow = this.getPivotRow(tableau, pivotCol);
+        int printRow = pivotRow + 1;
+        System.out.println("La fila que salió es " + printRow);
 
         if (pivotRow == null) {
             // Si no se puede encontrar una fila pivote (solución no acotada), lanza una excepción.
@@ -112,9 +118,15 @@ public class SimplexSolver extends AbstractLinearOptimizer {
                 }
             }
         }
+        try {
+            this.printer.printTableau(tableau);
+        } catch (FractionConversionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void solvePhase1(SimplexTableau tableau) throws OptimizationException {
+        this.printer = new PrintTableuImpl();
         if (tableau.getNumArtificialVariables() != 0) {
             // Resuelve la fase 1 del problema simplex si hay variables artificiales.
             while (!tableau.isOptimal()) {
@@ -132,7 +144,6 @@ public class SimplexSolver extends AbstractLinearOptimizer {
         // Crea un objeto SimplexTableau y lo inicializa.
 
         PrintTableuImpl printer = new PrintTableuImpl();
-        int iterator = 2;
 
         try {
             printer.printTableau(tableau);
@@ -142,22 +153,15 @@ public class SimplexSolver extends AbstractLinearOptimizer {
 
         // Resuelve la fase 1 (si es necesario) y luego realiza iteraciones hasta encontrar la solución óptima.
         this.solvePhase1(tableau);
+
         tableau.dropPhase1Objective();
 
         while (!tableau.isOptimal()) {
-            try {
-                System.out.println("iteration " + iterator);
-                printer.printTableau(tableau);
-            } catch (FractionConversionException e) {
-                throw new RuntimeException(e);
-            }
-
             this.doIteration(tableau);
-            iterator++;
         }
 
         // Imprime el resultado y devuelve la solución.
-        System.out.println("Last iteration" + iterator);
+        System.out.println("Ultima iteración" + this.getIterations());
 
         try {
             printer.printTableau(tableau);
