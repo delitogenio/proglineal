@@ -210,7 +210,7 @@ public class InputReader {
         solver.solve();
     }
 
-    private static void solveWithSimplexMod() throws OptimizationException {
+   private static void solveWithSimplexMod() throws OptimizationException {
         Scanner scanner = new Scanner(System.in);
         GoalType goalType;
 

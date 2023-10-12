@@ -91,7 +91,7 @@ public class SimplexSolver extends AbstractLinearOptimizer {
 
     protected void doIteration(SimplexTableau tableau) throws OptimizationException {
         this.incrementIterationsCounter();
-        System.out.println("Doing " + this.getIterations());
+//        System.out.println("Doing " + this.getIterations());
         Integer pivotCol = this.getPivotColumn(tableau);
         Integer pivotRow = this.getPivotRow(tableau, pivotCol);
         if (pivotRow == null) {
@@ -108,12 +108,12 @@ public class SimplexSolver extends AbstractLinearOptimizer {
             }
 
         }
-        this.printer = new PrintTableuImpl();
-        try {
-            printer.printTableau(tableau);
-        } catch (FractionConversionException e) {
-            throw new RuntimeException(e);
-        }
+//        this.printer = new PrintTableuImpl();
+//        try {
+//            printer.printTableau(tableau);
+//        } catch (FractionConversionException e) {
+//            throw new RuntimeException(e);
+//        }
 
     }
 
@@ -133,6 +133,7 @@ public class SimplexSolver extends AbstractLinearOptimizer {
         SimplexTableau tableau = new SimplexTableau(this.function, this.linearConstraints, this.goal, this.nonNegative, this.epsilon);
         System.out.println("Tablero simplex creado");
         PrintTableuImpl printer = new PrintTableuImpl();
+        int iterator = 2;
         try {
             printer.printTableau(tableau);
         } catch (FractionConversionException e) {
@@ -141,7 +142,20 @@ public class SimplexSolver extends AbstractLinearOptimizer {
         this.solvePhase1(tableau);
         tableau.dropPhase1Objective();
         while(!tableau.isOptimal()) {
+            try {
+                System.out.println("iteration "+ iterator);
+                printer.printTableau(tableau);
+            } catch (FractionConversionException e) {
+                throw new RuntimeException(e);
+            }
             this.doIteration(tableau);
+            iterator++;
+        }
+        System.out.println("Last iteration" + iterator);
+        try {
+            printer.printTableau(tableau);
+        } catch (FractionConversionException e) {
+            throw new RuntimeException(e);
         }
 
         return tableau.getSolution();
