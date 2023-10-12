@@ -2,14 +2,14 @@ package org.progLin.interfaces;
 
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.Relationship;
-import org.progLin.simplex.LinearConstraintData;
+import org.progLin.model.LinearConstraintData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContraintCreatorImpl implements ConstraintCreator{
     @Override
-    public List<LinearConstraint> createConstraints(List<LinearConstraintData> constraintDataList) {
+    public List<LinearConstraint>   createConstraints(List<LinearConstraintData> constraintDataList) {
         List<LinearConstraint> constraints = new ArrayList<>();
         for (LinearConstraintData data : constraintDataList) {
             double[] coefficients = data.getCoefficients();

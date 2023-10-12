@@ -7,8 +7,9 @@ import org.apache.commons.math.optimization.OptimizationException;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
-import org.apache.commons.math.optimization.linear.SimplexSolver;
-import org.progLin.simplex.LinearConstraintData;
+
+import org.progLin.apachelibmod.SimplexSolver;
+import org.progLin.model.LinearConstraintData;
 import org.progLin.interfaces.ConstraintCreator;
 import org.progLin.interfaces.ContraintCreatorImpl;
 
@@ -19,12 +20,14 @@ public class TwoPhaseMethodSolver {
     private double[] objectiveCoefficients;
     private List<LinearConstraintData> constraintDataList;
     private ConstraintCreator constraintCreator;
+    private GoalType goalType;
 
-    public TwoPhaseMethodSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList) {
+    public TwoPhaseMethodSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList, GoalType goalType) {
         this.numVariables = numVariables;
         this.objectiveCoefficients = objectiveCoefficients;
         this.constraintDataList = constraintDataList;
         this.constraintCreator = new ContraintCreatorImpl();
+        this.goalType = goalType;
     }
 
     public void solve() throws OptimizationException {
@@ -37,7 +40,7 @@ public class TwoPhaseMethodSolver {
         RealPointValuePair phase1Solution = phase1Solver.optimize(
                 phase1ObjectiveFunction,
                 phase1Constraints,
-                GoalType.MINIMIZE, true
+               this.goalType, true
         );
 
         // Verificar si la Fase 1 encontró un punto factible
@@ -55,7 +58,7 @@ public class TwoPhaseMethodSolver {
         RealPointValuePair phase2Solution = phase2Solver.optimize(
                 phase2ObjectiveFunction,
                 phase2Constraints,
-                GoalType.MAXIMIZE,true
+                this.goalType,true
         );
 
         // Mostrar la solución óptima de la Fase 2

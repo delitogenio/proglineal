@@ -5,15 +5,14 @@ import org.apache.commons.math.optimization.OptimizationException;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
-import org.apache.commons.math.optimization.linear.SimplexSolver;
+import org.progLin.apachelibmod.SimplexSolver;
 import org.progLin.interfaces.ConstraintCreator;
 import org.progLin.interfaces.ContraintCreatorImpl;
 import org.progLin.model.LinearConstraintData;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class LinearProgrammingSolver {
+public class LinearProgrammingSolverMod {
     private int numVariables;
     private double[] objectiveCoefficients;
     private List<LinearConstraintData> constraintDataList;
@@ -21,7 +20,7 @@ public class LinearProgrammingSolver {
 
     private GoalType goalType;
 
-    public LinearProgrammingSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList, GoalType goalType) {
+    public LinearProgrammingSolverMod(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList, GoalType goalType) {
         this.numVariables = numVariables;
         this.objectiveCoefficients = objectiveCoefficients;
         this.constraintDataList = constraintDataList;

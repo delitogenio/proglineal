@@ -1,4 +1,4 @@
-package org.progLin.simplex;
+package org.progLin.model;
 
 public class LinearConstraintData {
 

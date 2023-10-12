@@ -5,8 +5,8 @@ import org.apache.commons.math.optimization.OptimizationException;
 import org.apache.commons.math.optimization.RealPointValuePair;
 import org.apache.commons.math.optimization.linear.LinearConstraint;
 import org.apache.commons.math.optimization.linear.LinearObjectiveFunction;
-import org.apache.commons.math.optimization.linear.SimplexSolver;
-import org.progLin.simplex.LinearConstraintData;
+import org.progLin.apachelibmod.SimplexSolver;
+import org.progLin.model.LinearConstraintData;
 import org.progLin.interfaces.ConstraintCreator;
 import org.progLin.interfaces.ContraintCreatorImpl;
 
@@ -21,11 +21,14 @@ public class BigMMethodSolver {
 
     private final ConstraintCreator constraintCreator;
 
-    public BigMMethodSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList) {
+    private GoalType goalType;
+
+    public BigMMethodSolver(int numVariables, double[] objectiveCoefficients, List<LinearConstraintData> constraintDataList, GoalType goalType) {
         this.numVariables = numVariables;
         this.objectiveCoefficients = objectiveCoefficients;
         this.constraintDataList = constraintDataList;
         this.constraintCreator = new ContraintCreatorImpl();
+        this.goalType = goalType;
     }
 
     public void solve() throws OptimizationException {
@@ -42,7 +45,7 @@ public class BigMMethodSolver {
         RealPointValuePair solution = solver.optimize(
                 objectiveFunction,
                 constraints,
-                GoalType.MAXIMIZE,true
+                this.goalType,true
         );
 
         // Mostrar la solución óptima
